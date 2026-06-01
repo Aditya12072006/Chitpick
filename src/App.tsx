@@ -822,65 +822,62 @@ export default function App() {
       >
         
         {/* Main Navbar Topbar control indicators */}
-        <div className="p-4 bg-black/30 border-b border-white/5 flex items-center justify-between gap-3 flex-shrink-0 z-10">
-          <div className="flex-1 min-w-0 flex items-center gap-2.5">
+        <div className="px-3 py-2.5 sm:px-4 sm:py-3.5 bg-black/30 border-b border-white/5 flex items-center justify-between gap-2.5 flex-shrink-0 z-10 select-none">
+          
+          <div className="flex items-center gap-2 flex-shrink-0">
             {/* Mobile/Tablet Setup Drawer trigger */}
             <button
               id="btn-trigger-setup"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden flex items-center gap-1.5 bg-gradient-to-r from-[#FFD93D] to-[#FF9F1C] hover:brightness-110 text-[#111827] px-3 py-2 rounded-xl font-extrabold text-xs shadow-lg shadow-yellow-500/10 active:scale-95 transition-transform shrink-0"
+              className="lg:hidden flex items-center gap-1.5 bg-gradient-to-r from-[#FFD93D] to-[#FF9F1C] hover:brightness-110 text-[#111827] px-2.5 py-1.5 rounded-lg font-extrabold text-[11px] shadow-lg shadow-yellow-500/10 active:scale-95 transition-transform"
               title="Open Setup & Friends panel"
             >
-              <UserPlus size={13} className="shrink-0" />
+              <UserPlus size={12} className="shrink-0" />
               <span>Roster ({names.length})</span>
             </button>
 
-            <div className="min-w-0">
-              <span className="text-[10px] text-white/40 uppercase font-extrabold block tracking-[1px] leading-tight">Active Question</span>
-              <div id="active-task-pill" className="text-xs sm:text-sm font-extrabold text-[#FFD93D] truncate drop-shadow-sm flex items-center gap-1.5 max-w-[140px] sm:max-w-xs md:max-w-sm">
-                <Sparkles size={13} className="text-[#FF9F1C] shrink-0 animate-pulse" />
-                <span>{task.trim() || 'Who gets picked? 🤔'}</span>
-              </div>
+            {/* Desktop Brand Tag / Decorative Felt board indicator */}
+            <div className="hidden lg:flex items-center gap-2 text-white/50">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] sm:text-[11px] font-extrabold tracking-[2px] uppercase">ChitPick Felt</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {/* Mode selection toggle */}
-            <div className="flex bg-neutral-900 border border-white/10 rounded-xl p-1 text-xs">
-              <button
-                id="mode-tap"
-                onClick={() => setMode('tap')}
-                className={`px-3 py-1.5 rounded-lg font-extrabold cursor-pointer transition-colors ${
-                  mode === 'tap' 
-                    ? 'bg-yellow-400/10 text-[#FFD93D] border border-yellow-400/30' 
-                    : 'text-white/40 hover:text-white border border-transparent'
-                }`}
-              >
-                TAP MODE
-              </button>
-              <button
-                id="mode-auto"
-                onClick={() => setMode('auto')}
-                className={`px-3 py-1.5 rounded-lg font-extrabold cursor-pointer transition-colors ${
-                  mode === 'auto' 
-                    ? 'bg-orange-400/10 text-[#FF9F1C] border border-orange-400/30' 
-                    : 'text-white/40 hover:text-white border border-transparent'
-                }`}
-              >
-                AUTO PICK
-              </button>
-            </div>
-
-            {/* History icon */}
+          {/* Mode selection toggle */}
+          <div className="flex bg-neutral-900 border border-white/10 rounded-xl p-0.5 sm:p-1 text-[10px] sm:text-xs">
             <button
-              id="btn-toggle-history"
-              onClick={() => setHistoryOpen(!historyOpen)}
-              className="px-3 py-2 bg-white/5 hover:bg-white/10 hover:text-white text-white/80 text-xs font-bold rounded-xl transition-all border border-white/5 flex items-center gap-1 shadow-sm"
+              id="mode-tap"
+              onClick={() => setMode('tap')}
+              className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg font-extrabold cursor-pointer transition-all ${
+                mode === 'tap' 
+                  ? 'bg-yellow-400/15 text-[#FFD93D] border border-yellow-400/25' 
+                  : 'text-white/40 hover:text-white border border-transparent'
+              }`}
             >
-              <History size={13} />
-              <span>History</span>
+              TAP MODE
+            </button>
+            <button
+              id="mode-auto"
+              onClick={() => setMode('auto')}
+              className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg font-extrabold cursor-pointer transition-all ${
+                mode === 'auto' 
+                  ? 'bg-orange-400/15 text-[#FF9F1C] border border-orange-400/25' 
+                  : 'text-white/40 hover:text-white border border-transparent'
+              }`}
+            >
+              AUTO PICK
             </button>
           </div>
+
+          {/* History icon */}
+          <button
+            id="btn-toggle-history"
+            onClick={() => setHistoryOpen(!historyOpen)}
+            className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-white/5 hover:bg-white/10 hover:text-white text-white/80 text-[11px] sm:text-xs font-bold rounded-lg transition-all border border-white/5 flex items-center gap-1.5 shadow-sm shrink-0"
+          >
+            <History size={12} className="sm:size-[13px]" />
+            <span className="hidden sm:inline">History</span>
+          </button>
         </div>
 
         {/* ── DESIGNER ROUND FELT TABLEBOARD ── */}
@@ -899,6 +896,15 @@ export default function App() {
           <div className="absolute inset-0 ring-[12px] ring-[#3b1c0e] ring-opacity-80 pointer-events-none z-20 shadow-[inset_0_0_40px_rgba(0,0,0,0.85)]" />
           <div className="absolute inset-0 ring-[2px] ring-[#5e2c15] ring-opacity-90 pointer-events-none z-20" />
 
+          {/* Absolute floating Active Question badge */}
+          <div className="absolute top-3.5 left-1/2 -translate-x-1/2 z-25 max-w-[90%] pointer-events-none text-center select-none shadow-md">
+            <div className="bg-black/65 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 inline-flex items-center gap-2">
+              <Sparkles size={11} className="text-[#FF9F1C] shrink-0 animate-pulse" />
+              <span className="text-[9px] uppercase font-black text-white/50 tracking-[1px] shrink-0 hidden sm:inline">Active Question:</span>
+              <span className="text-xs font-black text-[#FFD93D] truncate max-w-[130px] sm:max-w-xs md:max-w-sm drop-shadow-sm">{task.trim() || 'Who gets picked? 🤔'}</span>
+            </div>
+          </div>
+
           {/* Idle instructions display labels */}
           {gameState === 'idle' && (
             <div className="absolute inset-x-8 top-1/2 -translate-y-1/2 text-center pointer-events-none z-10 space-y-3">
@@ -913,13 +919,13 @@ export default function App() {
           )}
 
           {gameState === 'dropping' && (
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-xs font-semibold tracking-wide text-white/80 shadow-lg pointer-events-none z-10 transition-opacity">
+            <div className="absolute top-15 sm:top-16 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full text-xs font-semibold tracking-wide text-white/80 shadow-lg pointer-events-none z-10 transition-opacity">
               ♻️ Falling paper pieces...
             </div>
           )}
 
           {gameState === 'ready' && (
-            <div className="absolute top-6 left-1/2 -translate-x-1/2 bg-black/45 backdrop-blur-xs px-4 py-1.5 rounded-full text-[11px] font-extrabold tracking-[1px] uppercase text-[#FFD93D] border border-yellow-400/20 shadow-md pointer-events-none z-10 animate-pulse text-center">
+            <div className="absolute top-15 sm:top-16 left-1/2 -translate-x-1/2 bg-black/45 backdrop-blur-xs px-3.5 py-1.5 rounded-full text-[10px] sm:text-[11px] font-extrabold tracking-[0.5px] sm:tracking-[1px] uppercase text-[#FF9F1C] border border-orange-400/20 shadow-md pointer-events-none z-10 animate-pulse text-center max-w-[90%]">
               {mode === 'tap' ? '👈 Tap any folded paper chit to reveal!' : '🎯 Press Auto Pick below to choose randomly!'}
             </div>
           )}
