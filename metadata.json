@@ -1,0 +1,6 @@
+{
+  "name": "ChitPick",
+  "description": "Who's gonna do it? Let fate decide! Write tasks, add friends, and drop interactive paper chits to let fate choose.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
