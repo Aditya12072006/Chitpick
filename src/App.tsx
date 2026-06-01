@@ -129,35 +129,87 @@ export default function App() {
   const playSound = (type: 'drop' | 'flip' | 'pop' | 'shuffle') => {
     if (!soundEnabled || typeof window === 'undefined') return;
     try {
-      const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-      if (!AudioContext) return;
-      const ctx = new AudioContext();
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (!AudioContextClass) return;
+      const ctx = new AudioContextClass();
       
+      // Auto-resume context if suspended (common browser interaction constraint)
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+
+      // Helper to generate a bandpassed noise burst for realistic paper texture
+      const playNoiseBurst = (timeOffset: number, duration: number, bandpassFreq: number, q: number, maxGain: number) => {
+        try {
+          const bufferSize = ctx.sampleRate * duration;
+          const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+          const data = buffer.getChannelData(0);
+          for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+          }
+          const noise = ctx.createBufferSource();
+          noise.buffer = buffer;
+
+          const filter = ctx.createBiquadFilter();
+          filter.type = 'bandpass';
+          filter.frequency.setValueAtTime(bandpassFreq, ctx.currentTime + timeOffset);
+          filter.Q.setValueAtTime(q, ctx.currentTime + timeOffset);
+
+          const gainNode = ctx.createGain();
+          gainNode.gain.setValueAtTime(maxGain, ctx.currentTime + timeOffset);
+          gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + timeOffset + duration);
+
+          noise.connect(filter);
+          filter.connect(gainNode);
+          gainNode.connect(ctx.destination);
+
+          noise.start(ctx.currentTime + timeOffset);
+          noise.stop(ctx.currentTime + timeOffset + duration);
+        } catch (e) {
+          // Ignore soft errors in background noise playback
+        }
+      };
+
       if (type === 'drop') {
+        // A tactile paper-drop on felt sound (higher, crispy frequencies audible on mobile)
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.type = 'triangle';
-        osc.frequency.setValueAtTime(140, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.12);
-        gain.gain.setValueAtTime(0.08, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+        osc.frequency.setValueAtTime(320, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.38, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        
         osc.start();
-        osc.stop(ctx.currentTime + 0.13);
+        osc.stop(ctx.currentTime + 0.16);
+
+        // Add small paper rustling sound
+        playNoiseBurst(0, 0.12, 1200, 2.5, 0.28);
+
       } else if (type === 'flip') {
+        // Unfolding paper sound: brief tactile flick, rising frequency
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         osc.connect(gain);
         gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(250, ctx.currentTime);
-        osc.frequency.exponentialRampToValueAtTime(550, ctx.currentTime + 0.15);
-        gain.gain.setValueAtTime(0.06, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(380, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(800, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.32, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+        
         osc.start();
-        osc.stop(ctx.currentTime + 0.16);
+        osc.stop(ctx.currentTime + 0.19);
+
+        // High frequency crinkle noise
+        playNoiseBurst(0, 0.15, 2100, 3, 0.28);
+
       } else if (type === 'pop') {
+        // Energetic "pick reveal" succulent pop and winning chime
+        
+        // 1. Double oscillator pop
         const osc1 = ctx.createOscillator();
         const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
@@ -167,33 +219,74 @@ export default function App() {
         gain.connect(ctx.destination);
         
         osc1.type = 'triangle';
-        osc1.frequency.setValueAtTime(330, ctx.currentTime);
-        osc1.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.25);
+        osc1.frequency.setValueAtTime(450, ctx.currentTime);
+        osc1.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1);
         
         osc2.type = 'sine';
-        osc2.frequency.setValueAtTime(392, ctx.currentTime);
-        osc2.frequency.exponentialRampToValueAtTime(784, ctx.currentTime + 0.25);
+        osc2.frequency.setValueAtTime(550, ctx.currentTime);
+        osc2.frequency.exponentialRampToValueAtTime(1500, ctx.currentTime + 0.1);
         
-        gain.gain.setValueAtTime(0.1, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.3);
+        gain.gain.setValueAtTime(0.48, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15);
         
         osc1.start();
         osc2.start();
-        osc1.stop(ctx.currentTime + 0.3);
-        osc2.stop(ctx.currentTime + 0.3);
+        osc1.stop(ctx.currentTime + 0.16);
+        osc2.stop(ctx.currentTime + 0.16);
+
+        // 2. High frequency impact transient
+        playNoiseBurst(0, 0.08, 1600, 1.2, 0.25);
+
+        // 3. Victory bell / chime (two harmonic clean frequencies)
+        const chime1 = ctx.createOscillator();
+        const chime2 = ctx.createOscillator();
+        const chimeGain = ctx.createGain();
+        chime1.connect(chimeGain);
+        chime2.connect(chimeGain);
+        chimeGain.connect(ctx.destination);
+
+        chime1.type = 'sine';
+        chime1.frequency.setValueAtTime(880, ctx.currentTime + 0.03); // A5 note
+        chime2.type = 'sine';
+        chime2.frequency.setValueAtTime(1318.5, ctx.currentTime + 0.03); // E6 note (harmonic fourth)
+
+        chimeGain.gain.setValueAtTime(0.24, ctx.currentTime + 0.03);
+        chimeGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+        chime1.start(ctx.currentTime + 0.03);
+        chime2.start(ctx.currentTime + 0.03);
+        chime1.stop(ctx.currentTime + 0.52);
+        chime2.stop(ctx.currentTime + 0.52);
+
       } else if (type === 'shuffle') {
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(100, ctx.currentTime);
-        osc.frequency.linearRampToValueAtTime(180, ctx.currentTime + 0.1);
-        osc.frequency.linearRampToValueAtTime(110, ctx.currentTime + 0.2);
-        gain.gain.setValueAtTime(0.05, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.2);
-        osc.start();
-        osc.stop(ctx.currentTime + 0.22);
+        // Rapid 3-beat chit ruffling sounds of shuffling papers
+        const beats = [0, 0.06, 0.12];
+        beats.forEach((timeOffset, idx) => {
+          try {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = 'sine';
+            
+            // Vary pitch slightly to feel dynamic and natural
+            const startFreq = 260 + idx * 40;
+            const endFreq = 180 + idx * 20;
+            osc.frequency.setValueAtTime(startFreq, ctx.currentTime + timeOffset);
+            osc.frequency.linearRampToValueAtTime(endFreq, ctx.currentTime + timeOffset + 0.05);
+            
+            gain.gain.setValueAtTime(0.32, ctx.currentTime + timeOffset);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + timeOffset + 0.05);
+            
+            osc.start(ctx.currentTime + timeOffset);
+            osc.stop(ctx.currentTime + timeOffset + 0.06);
+
+            // Shuffling noise rasp for each beat
+            playNoiseBurst(timeOffset, 0.05, 1100 + (idx * 150), 3, 0.26);
+          } catch (e) {
+            // Ignore
+          }
+        });
       }
     } catch (e) {
       // Autoplay rules may block audio
